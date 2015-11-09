@@ -4,11 +4,10 @@ import io.swagger.codegen.*;
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.*;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 import java.util.*;
-
-import org.apache.commons.lang.StringUtils;
 
 public class ScalaClientCodegen extends DefaultCodegen implements CodegenConfig {
     protected String invokerPackage = "io.swagger.client";
@@ -25,7 +24,7 @@ public class ScalaClientCodegen extends DefaultCodegen implements CodegenConfig 
         outputFolder = "generated-code/scala";
         modelTemplateFiles.put("model.mustache", ".scala");
         apiTemplateFiles.put("api.mustache", ".scala");
-        templateDir = "scala";
+        embeddedTemplateDir = templateDir = "scala";
         apiPackage = "io.swagger.client.api";
         modelPackage = "io.swagger.client.model";
 
@@ -90,6 +89,9 @@ public class ScalaClientCodegen extends DefaultCodegen implements CodegenConfig 
         );
         instantiationTypes.put("array", "ListBuffer");
         instantiationTypes.put("map", "HashMap");
+
+        cliOptions.add(new CliOption(CodegenConstants.MODEL_PACKAGE, CodegenConstants.MODEL_PACKAGE_DESC));
+        cliOptions.add(new CliOption(CodegenConstants.API_PACKAGE, CodegenConstants.API_PACKAGE_DESC));
     }
 
     @Override

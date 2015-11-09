@@ -225,7 +225,7 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
                                     .withLoader(new Mustache.TemplateLoader() {
                                         @Override
                                         public Reader getTemplate(String name) {
-                                            return getTemplateReader(config.templateDir() + File.separator + name + ".mustache");
+                                            return getTemplateReader(getFullTemplateFile(config, name + ".mustache"));
                                         }
                                     })
                                     .defaultValue("")
@@ -271,6 +271,13 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
                     operation.put("classVarName", config.toApiVarName(tag));
                     operation.put("importPath", config.toApiImport(tag));
 
+                    // Pass sortParamsByRequiredFlag through to the Mustache template...
+                    boolean sortParamsByRequiredFlag = true;
+                    if (this.config.additionalProperties().containsKey(CodegenConstants.SORT_PARAMS_BY_REQUIRED_FLAG)) {
+                        sortParamsByRequiredFlag = Boolean.valueOf((String)this.config.additionalProperties().get(CodegenConstants.SORT_PARAMS_BY_REQUIRED_FLAG).toString());
+                    }
+                    operation.put("sortParamsByRequiredFlag", sortParamsByRequiredFlag);
+
                     processMimeTypes(swagger.getConsumes(), operation, "consumes");
                     processMimeTypes(swagger.getProduces(), operation, "produces");
 
@@ -294,7 +301,7 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
                                 .withLoader(new Mustache.TemplateLoader() {
                                     @Override
                                     public Reader getTemplate(String name) {
-                                        return getTemplateReader(config.templateDir() + File.separator + name + ".mustache");
+                                        return getTemplateReader(getFullTemplateFile(config, name + ".mustache"));
                                     }
                                 })
                                 .defaultValue("")
@@ -386,7 +393,7 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
                                     .withLoader(new Mustache.TemplateLoader() {
                                         @Override
                                         public Reader getTemplate(String name) {
-                                            return getTemplateReader(config.templateDir() + File.separator + name + ".mustache");
+                                            return getTemplateReader(getFullTemplateFile(config, name + ".mustache"));
                                         }
                                     })
                                     .defaultValue("")

@@ -28,7 +28,7 @@ public class PythonClientCodegen extends DefaultCodegen implements CodegenConfig
         outputFolder = "generated-code" + File.separatorChar + "python";
         modelTemplateFiles.put("model.mustache", ".py");
         apiTemplateFiles.put("api.mustache", ".py");
-        templateDir = "python";
+        embeddedTemplateDir = templateDir = "python";
 
         languageSpecificPrimitives.clear();
         languageSpecificPrimitives.add("int");
@@ -63,9 +63,11 @@ public class PythonClientCodegen extends DefaultCodegen implements CodegenConfig
                         "return", "def", "for", "lambda", "try"));
 
         cliOptions.clear();
-        cliOptions.add(new CliOption(CodegenConstants.PACKAGE_NAME, "python package name (convention: snake_case)," +
-                " default: swagger_client"));
-        cliOptions.add(new CliOption(CodegenConstants.PACKAGE_VERSION, "python package version, default: 1.0.0"));
+        cliOptions.add(new CliOption(CodegenConstants.PACKAGE_NAME, "python package name (convention: snake_case).")
+                .defaultValue("swagger_client"));
+        cliOptions.add(new CliOption(CodegenConstants.PACKAGE_VERSION, "python package version.")
+                .defaultValue("1.0.0"));
+        cliOptions.add(new CliOption(CodegenConstants.SORT_PARAMS_BY_REQUIRED_FLAG, CodegenConstants.SORT_PARAMS_BY_REQUIRED_FLAG_DESC));
     }
 
     @Override
@@ -173,6 +175,9 @@ public class PythonClientCodegen extends DefaultCodegen implements CodegenConfig
         // sanitize name
         name = sanitizeName(name);
 
+        // remove dollar sign
+        name = name.replaceAll("$", "");
+
         // if it's all uppper case, convert to lower case
         if (name.matches("^[A-Z_]*$")) {
             name = name.toLowerCase();
@@ -202,6 +207,9 @@ public class PythonClientCodegen extends DefaultCodegen implements CodegenConfig
     @Override
     public String toModelName(String name) {
         name = sanitizeName(name);
+
+        // remove dollar sign
+        name = name.replaceAll("$", "");
 
         // model name cannot use reserved keyword, e.g. return
         if (reservedWords.contains(name)) {

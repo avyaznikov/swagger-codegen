@@ -1,9 +1,9 @@
 /// <reference path="api.d.ts" />
 
-module API.Client {
+namespace API.Client {
     'use strict';
 
-    export class Pet {
+    export interface Pet {
 
         id: number;
 
@@ -21,11 +21,11 @@ module API.Client {
         status: Pet.StatusEnum;
     }
 
-    export module Pet {
+    export namespace Pet {
 
-        export enum StatusEnum {  
-            available = <any> 'available', 
-            pending = <any> 'pending', 
+        export enum StatusEnum { 
+            available = <any> 'available',
+            pending = <any> 'pending',
             sold = <any> 'sold',
         }
     }

@@ -38,7 +38,7 @@ public class PhpClientCodegen extends DefaultCodegen implements CodegenConfig {
         outputFolder = "generated-code" + File.separator + "php";
         modelTemplateFiles.put("model.mustache", ".php");
         apiTemplateFiles.put("api.mustache", ".php");
-        templateDir = "php";
+        embeddedTemplateDir = templateDir = "php";
         apiPackage = invokerPackage + "\\Api";
         modelPackage = invokerPackage + "\\Model";
 
@@ -91,7 +91,10 @@ public class PhpClientCodegen extends DefaultCodegen implements CodegenConfig {
         typeMapping.put("object", "object");
         typeMapping.put("DateTime", "\\DateTime");
 
-        cliOptions.add(new CliOption(VARIABLE_NAMING_CONVENTION, "naming convention of variable name, e.g. camelCase. Default: snake_case"));
+        cliOptions.add(new CliOption(CodegenConstants.MODEL_PACKAGE, CodegenConstants.MODEL_PACKAGE_DESC));
+        cliOptions.add(new CliOption(CodegenConstants.API_PACKAGE, CodegenConstants.API_PACKAGE_DESC));
+        cliOptions.add(new CliOption(VARIABLE_NAMING_CONVENTION, "naming convention of variable name, e.g. camelCase.")
+                .defaultValue("snake_case"));
         cliOptions.add(new CliOption(CodegenConstants.INVOKER_PACKAGE, "The main namespace to use for all classes. e.g. Yay\\Pets"));
         cliOptions.add(new CliOption(PACKAGE_PATH, "The main package name for classes. e.g. GeneratedPetstore"));
         cliOptions.add(new CliOption(SRC_BASE_PATH, "The directory under packagePath to serve as source root."));
@@ -333,6 +336,9 @@ public class PhpClientCodegen extends DefaultCodegen implements CodegenConfig {
     public String toModelName(String name) {
         // Note: backslash ("\\") is allowed for e.g. "\\DateTime"
         name = name.replaceAll("[^\\w\\\\]+", "_");
+
+        // remove dollar sign
+        name = name.replaceAll("$", "");
 
         // model name cannot use reserved keyword
         if (reservedWords.contains(name)) {

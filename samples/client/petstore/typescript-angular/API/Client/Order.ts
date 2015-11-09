@@ -1,9 +1,9 @@
 /// <reference path="api.d.ts" />
 
-module API.Client {
+namespace API.Client {
     'use strict';
 
-    export class Order {
+    export interface Order {
 
         id: number;
 
@@ -21,11 +21,11 @@ module API.Client {
         complete: boolean;
     }
 
-    export module Order {
+    export namespace Order {
 
-        export enum StatusEnum {  
-            placed = <any> 'placed', 
-            approved = <any> 'approved', 
+        export enum StatusEnum { 
+            placed = <any> 'placed',
+            approved = <any> 'approved',
             delivered = <any> 'delivered',
         }
     }

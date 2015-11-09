@@ -1,9 +1,9 @@
 /// <reference path="api.d.ts" />
 
-module API.Client {
+namespace API.Client {
     'use strict';
 
-    export class User {
+    export interface User {
 
         id: number;
 
