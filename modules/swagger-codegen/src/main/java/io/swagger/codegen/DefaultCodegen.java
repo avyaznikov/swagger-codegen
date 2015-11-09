@@ -711,6 +711,7 @@ public class DefaultCodegen {
             m.hasEnums = false; // Otherwise there will be a NullPointerException in JavaClientCodegen.fromModel
             addParentContainer(m, name, arrayProperty);
         } else if (model instanceof RefModel) {
+            // importMapping.get(((RefModel) model).getSimpleRef());
             // TODO
         } else if (model instanceof ComposedModel) {
             final ComposedModel composed = (ComposedModel) model;

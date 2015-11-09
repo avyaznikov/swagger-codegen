@@ -172,6 +172,7 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
 
         List<Object> allOperations = new ArrayList<Object>();
         List<Object> allModels = new ArrayList<Object>();
+        Map<String, Model> emptyModels = new HashMap<String, Model>();
 
         // models
         Map<String, Model> definitions = swagger.getDefinitions();
@@ -189,20 +190,28 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
                     sortedModelKeys = updatedKeys;
                 }
 
-                for (String name : sortedModelKeys) {
+                for (final String name : sortedModelKeys) {
                     try {
                         //don't generate models that have an import mapping
                         if(config.importMapping().containsKey(name)) {
                             continue;
                         }
 
-                        Model model = definitions.get(name);
+                        final Model model = definitions.get(name);
                         Map<String, Model> modelMap = new HashMap<String, Model>();
                         modelMap.put(name, model);
                         Map<String, Object> models = processModels(config, modelMap, definitions);
                         models.putAll(config.additionalProperties());
+                        // ugly hack!
+                        Object newModel = ((List<Object>) models.get("models")).get(0);
+                        CodegenModel cm = (CodegenModel)((Map<String,Object>)newModel).get("model");
+                        // this is primitive type
+                        if (cm.vars.isEmpty()) {
+                            emptyModels.put(name, model);
+                            continue;
+                        }
 
-                        allModels.add(((List<Object>) models.get("models")).get(0));
+                        allModels.add(newModel);
 
                         for (String templateName : config.modelTemplateFiles().keySet()) {
                             String suffix = config.modelTemplateFiles().get(templateName);
@@ -319,6 +328,7 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
         bundle.put("contextPath", contextPath);
         bundle.put("apiInfo", apis);
         bundle.put("models", allModels);
+        bundle.put("emptyModels", emptyModels);
         bundle.put("apiFolder", config.apiPackage().replace('.', File.separatorChar));
         bundle.put("modelPackage", config.modelPackage());
         List<CodegenSecurity> authMethods = config.fromSecurity(swagger.getSecurityDefinitions());

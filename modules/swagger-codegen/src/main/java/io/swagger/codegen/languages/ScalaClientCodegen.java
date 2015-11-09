@@ -1,29 +1,12 @@
 package io.swagger.codegen.languages;
 
-import io.swagger.codegen.CodegenConfig;
-import io.swagger.codegen.CodegenConstants;
-import io.swagger.codegen.CodegenType;
-import io.swagger.codegen.DefaultCodegen;
-import io.swagger.codegen.SupportingFile;
-import io.swagger.models.properties.ArrayProperty;
-import io.swagger.models.properties.BooleanProperty;
-import io.swagger.models.properties.DateProperty;
-import io.swagger.models.properties.DateTimeProperty;
-import io.swagger.models.properties.DoubleProperty;
-import io.swagger.models.properties.FloatProperty;
-import io.swagger.models.properties.IntegerProperty;
-import io.swagger.models.properties.LongProperty;
-import io.swagger.models.properties.MapProperty;
-import io.swagger.models.properties.Property;
-import io.swagger.models.properties.StringProperty;
+import io.swagger.codegen.*;
+import io.swagger.models.Model;
+import io.swagger.models.ModelImpl;
+import io.swagger.models.properties.*;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -81,6 +64,7 @@ public class ScalaClientCodegen extends DefaultCodegen implements CodegenConfig 
         typeMapping.put("boolean", "Boolean");
         typeMapping.put("string", "String");
         typeMapping.put("int", "Int");
+        typeMapping.put("integer", "Int");
         typeMapping.put("long", "Long");
         typeMapping.put("float", "Float");
         typeMapping.put("byte", "Byte");
@@ -108,6 +92,18 @@ public class ScalaClientCodegen extends DefaultCodegen implements CodegenConfig 
         instantiationTypes.put("map", "HashMap");
     }
 
+    @Override
+    public void processOpts() {
+        super.processOpts();
+        supportingFiles.add(new SupportingFile("package.mustache",
+                (sourceFolder + File.separator + modelPackage()).replace('.', File.separatorChar), "package.scala"));
+        String packageName = modelPackage();
+        int dotIdx = packageName.lastIndexOf('.');
+        String packageForObject = packageName.substring(0, dotIdx);
+        additionalProperties.put("packageForObject", packageForObject);
+        additionalProperties.put("packageObjectName", packageName.substring(dotIdx + 1));
+    }
+
     public CodegenType getTag() {
         return CodegenType.CLIENT;
     }
@@ -122,7 +118,7 @@ public class ScalaClientCodegen extends DefaultCodegen implements CodegenConfig 
 
     @Override
     public String escapeReservedWord(String name) {
-        return "_" + name;
+        return "`" + name + "`";
     }
 
     @Override
@@ -157,7 +153,7 @@ public class ScalaClientCodegen extends DefaultCodegen implements CodegenConfig 
             type = typeMapping.get(swaggerType);
             if (languageSpecificPrimitives.contains(type)) {
                 return toModelName(type);
-            }
+            } else return type;
         } else {
             type = swaggerType;
         }
@@ -235,6 +231,35 @@ public class ScalaClientCodegen extends DefaultCodegen implements CodegenConfig 
             String _import = iterator.next().get("import");
             if (_import.startsWith(prefix)) iterator.remove();
         }
+        return objs;
+    }
+
+    @Override
+    public Map<String, Object> postProcessSupportingFileData(Map<String, Object> objs) {
+        Map<String, Model> emptyModels = (Map<String, Model>) objs.get("emptyModels");
+        List<Map<String, String>> items = new ArrayList<Map<String, String>>();
+        for (String name : emptyModels.keySet()) {
+            Model m = emptyModels.get(name);
+            String format = ((ModelImpl) m).getFormat();
+            Map<String, String> item = new HashMap<String, String>();
+            item.put("typeFrom", name);
+            String scalaType = null;
+            if (LongProperty.isType(BaseIntegerProperty.TYPE, format)) {
+                scalaType = getTypeDeclaration(new LongProperty());
+            } else if (IntegerProperty.isType(BaseIntegerProperty.TYPE, format)) {
+                scalaType = getTypeDeclaration(new LongProperty());
+            } else {
+                // default is string
+                scalaType = getTypeDeclaration(new StringProperty());
+            }
+            if (scalaType != null) {
+                item.put("typeTo", scalaType);
+                items.add(item);
+            }
+
+        }
+
+        objs.put("emptyModels", items);
         return objs;
     }
 
